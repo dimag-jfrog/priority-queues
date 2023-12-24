@@ -157,24 +157,31 @@ func (pq *priorityQueuesByFreq[T]) updateStateOnReceivingMessageToBucket(levelIn
 
 func (pq *priorityQueuesByFreq[T]) mergeAllNextLevelsBackIntoCurrentLevel(levelIndex int) {
 	chosenLevel := pq.levels[levelIndex]
-	chosenLevel.TotalValue = 0
-	for nextLevelIndex := levelIndex + 1; nextLevelIndex <= len(pq.levels)-1; nextLevelIndex++ {
-		nextLevel := pq.levels[nextLevelIndex]
-		chosenLevel.Buckets = append(chosenLevel.Buckets, nextLevel.Buckets...)
+	if levelIndex < len(pq.levels)-1 {
+		for nextLevelIndex := levelIndex + 1; nextLevelIndex <= len(pq.levels)-1; nextLevelIndex++ {
+			nextLevel := pq.levels[nextLevelIndex]
+			chosenLevel.Buckets = append(chosenLevel.Buckets, nextLevel.Buckets...)
+		}
+		sort.Slice(chosenLevel.Buckets, func(i int, j int) bool {
+			return chosenLevel.Buckets[i].Capacity > chosenLevel.Buckets[j].Capacity
+		})
+		pq.levels = pq.levels[0 : levelIndex+1]
 	}
-	pq.levels = pq.levels[0 : levelIndex+1]
+	chosenLevel.TotalValue = 0
 	for i := range chosenLevel.Buckets {
 		chosenLevel.Buckets[i].Value = 0
 	}
-	sort.Slice(chosenLevel.Buckets, func(i int, j int) bool {
-		return chosenLevel.Buckets[i].Capacity > chosenLevel.Buckets[j].Capacity
-	})
 }
 
 func (pq *priorityQueuesByFreq[T]) moveBucketToNextLevel(levelIndex int, bucketIndex int) {
 	chosenLevel := pq.levels[levelIndex]
 	chosenBucket := chosenLevel.Buckets[bucketIndex]
 	chosenBucket.Value = 0
+	if len(chosenLevel.Buckets) == 1 {
+		// if this bucket is the only one on its level - no need to move it to next level
+		chosenLevel.TotalValue = 0
+		return
+	}
 	if levelIndex == len(pq.levels)-1 {
 		pq.levels = append(pq.levels, &level[T]{})
 	}
