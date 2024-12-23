@@ -196,9 +196,9 @@ func TestProcessMessagesByPriorityAmongFreqRatioQueueGroups_MessagesInOneOfTheCh
 		msgsChannels[0] <- &Msg{Body: fmt.Sprintf("Priority-1 Msg-%d", j)}
 		msgsChannels[2] <- &Msg{Body: fmt.Sprintf("Priority-3 Msg-%d", j)}
 	}
-	msgsChannels[1] <- &Msg{Body: fmt.Sprintf("Priority-2 Msg-%d", 1)}
-	msgsChannels[1] <- &Msg{Body: fmt.Sprintf("Priority-2 Msg-%d", 2)}
-	msgsChannels[1] <- &Msg{Body: fmt.Sprintf("Priority-2 Msg-%d", 3)}
+	for j := 1; j <= 7; j++ {
+		msgsChannels[1] <- &Msg{Body: fmt.Sprintf("Priority-2 Msg-%d", j)}
+	}
 	waitForMessagesFromPriority2Chan <- struct{}{}
 
 	time.Sleep(3 * time.Second)
@@ -212,12 +212,16 @@ func TestProcessMessagesByPriorityAmongFreqRatioQueueGroups_MessagesInOneOfTheCh
 		{Body: "Priority-3 Msg-5 - Simulate long processing"},
 		{Body: "Priority-3 Msg-6"},
 		{Body: "Priority-3 Msg-7"},
+		{Body: "Priority-1 Msg-1"},
 		{Body: "Priority-2 Msg-1"},
 		{Body: "Priority-2 Msg-2"},
-		{Body: "Priority-1 Msg-1"},
 		{Body: "Priority-2 Msg-3"},
+		{Body: "Priority-2 Msg-4"},
 		{Body: "Priority-1 Msg-2"},
+		{Body: "Priority-2 Msg-5"},
+		{Body: "Priority-2 Msg-6"},
 		{Body: "Priority-1 Msg-3"},
+		{Body: "Priority-2 Msg-7"},
 		{Body: "Priority-1 Msg-4"},
 		{Body: "Priority-1 Msg-5"},
 		{Body: "Priority-1 Msg-6"},
