@@ -1,14 +1,19 @@
-package priority_queues_test
+package queue_groups_test
 
 import (
 	"context"
 	"fmt"
+	"github.com/dimag-jfrog/priority-queues/queue-groups"
 	"strings"
 	"testing"
 	"time"
 
 	pq "github.com/dimag-jfrog/priority-queues"
 )
+
+type Msg struct {
+	Body string
+}
 
 func TestProcessMessagesByPriorityAmongFreqRatioQueueGroups(t *testing.T) {
 	msgsChannels := make([]chan *Msg, 4)
@@ -17,7 +22,7 @@ func TestProcessMessagesByPriorityAmongFreqRatioQueueGroups(t *testing.T) {
 	msgsChannels[2] = make(chan *Msg, 15)
 	msgsChannels[3] = make(chan *Msg, 15)
 
-	queues := []pq.PriorityQueueGroupWithFreqRatio[*Msg]{
+	queues := []queue_groups.PriorityQueueGroupWithFreqRatio[*Msg]{
 		{
 			QueuesWithFreqRatios: []pq.QueueFreqRatio[*Msg]{
 				{
@@ -70,7 +75,7 @@ func TestProcessMessagesByPriorityAmongFreqRatioQueueGroups(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go pq.ProcessMessagesByPriorityAmongFreqRatioQueueGroups(ctx, queues, msgProcessor)
+	go queue_groups.ProcessMessagesByPriorityAmongFreqRatioQueueGroups(ctx, queues, msgProcessor)
 
 	time.Sleep(3 * time.Second)
 	cancel()
@@ -141,7 +146,7 @@ func TestProcessMessagesByPriorityAmongFreqRatioQueueGroups_MessagesInOneOfTheCh
 	msgsChannels[1] = make(chan *Msg, 7)
 	msgsChannels[2] = make(chan *Msg, 7)
 
-	queues := []pq.PriorityQueueGroupWithFreqRatio[*Msg]{
+	queues := []queue_groups.PriorityQueueGroupWithFreqRatio[*Msg]{
 		{
 			QueuesWithFreqRatios: []pq.QueueFreqRatio[*Msg]{
 				{
@@ -189,7 +194,7 @@ func TestProcessMessagesByPriorityAmongFreqRatioQueueGroups_MessagesInOneOfTheCh
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go pq.ProcessMessagesByPriorityAmongFreqRatioQueueGroups(ctx, queues, msgProcessor)
+	go queue_groups.ProcessMessagesByPriorityAmongFreqRatioQueueGroups(ctx, queues, msgProcessor)
 
 	time.Sleep(1 * time.Second)
 	for j := 6; j <= 7; j++ {
